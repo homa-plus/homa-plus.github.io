@@ -1,7 +1,6 @@
 :root {
     --sh-col: rgba(25, 27, 30, 0.7);
 }
-
 body {
     margin: 0;
     padding: 0;
@@ -76,6 +75,11 @@ body {
     min-width: auto;
     margin: 0;
 }
+
+/*
+    Скрытое послание для тех кто не поленился копать код
+    Фоточки я беру с 7-мой по размеру БД yande.re
+*/
 
 @media screen and (max-width: 1000px) {
     .eb {
