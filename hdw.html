@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Грудная клетка — расчёт параметров</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/main_style.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">Расчёт параметров грудной клетки</h3>
+                </div>
+                <div class="card-body">
+
+                    <!-- Ползунки -->
+                    <div class="row g-4 mb-4">
+
+                        <div class="col-md-4">
+                            <label class="form-label">Обхват (см)</label>
+                            <input type="range" id="circ" class="form-range" min="60" max="110" step="0.5" value="75">
+                            <input type="number" id="circ_val" class="form-control mt-1" step="0.5" value="75">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Ширина (см)</label>
+                            <input type="range" id="width" class="form-range" min="20" max="40" step="0.5" value="30">
+                            <input type="number" id="width_val" class="form-control mt-1" step="0.5" value="30">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Глубина (см)</label>
+                            <input type="range" id="depth" class="form-range" min="12" max="30" step="0.5" value="19">
+                            <input type="number" id="depth_val" class="form-control mt-1" step="0.5" value="19">
+                        </div>
+
+                    </div>
+
+					<div class="mb-4">
+                        <label class="form-label">Коэффициент формы N</label>
+                        <select id="coefN" class="form-select">
+                            <option value="2.3">N = 2.3 (над грудью — более округлая)</option>
+                            <option value="2.5" selected>N = 2.5 (универсальная модель)</option>
+                            <option value="2.7">N = 2.7 (под грудью — более плоская)</option>
+                            <option value="3.0">N = 3.0 (ещё более плоская)</option>
+                        </select>
+                    </div>
+
+                    <hr>
+
+                    <p class="text-muted">
+                        Меняй любые <b>два</b> параметра — третий пересчитается автоматически по модели
+                    </p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+	// -------------------------
+// Суперэллипс: |x/a|^n + |y/b|^n = 1
+// -------------------------
+var n = 2.5; // Параметр формы (2=эллипс, 3≈квадрат, 2.5-3=грудная клетка)
+
+// -------------------------
+// Численное интегрирование периметра суперэллипса
+// -------------------------
+function getSuperellipsePerimeter(a, b, n, segments = 1000) {
+    let perimeter = 0;
+    
+    for (let i = 0; i < segments; i++) {
+        const t1 = (i / segments) * Math.PI / 2;
+        const t2 = ((i + 1) / segments) * Math.PI / 2;
+        
+        // x(t) = a * |cos(t)|^(2/n) * sign(cos(t))
+        // y(t) = b * |sin(t)|^(2/n) * sign(sin(t))
+        
+        const x1 = a * Math.pow(Math.abs(Math.cos(t1)), 2/n);
+        const y1 = b * Math.pow(Math.abs(Math.sin(t1)), 2/n);
+        
+        const x2 = a * Math.pow(Math.abs(Math.cos(t2)), 2/n);
+        const y2 = b * Math.pow(Math.abs(Math.sin(t2)), 2/n);
+        
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        perimeter += Math.sqrt(dx * dx + dy * dy);
+    }
+    
+    return perimeter * 4; // умножаем на 4 (считали только 1/4)
+}
+
+// -------------------------
+// Пересчёт параметров
+// -------------------------
+function updateFromCircWidth() {
+    const C = parseFloat(circ_val.value);
+    const W = parseFloat(width_val.value);
+    const a = W / 2;
+    
+    // Численный поиск b
+    let b = C / (Math.PI * 2); // начальное приближение
+    
+    for (let iter = 0; iter < 20; iter++) {
+        const p = getSuperellipsePerimeter(a, b, n);
+        const dp = (p - C) / b * 0.1; // производная
+        b -= dp;
+        if (Math.abs(p - C) < 0.1) break;
+    }
+    
+    depth_val.value = (b * 2).toFixed(1);
+    depth.value = depth_val.value;
+}
+
+function updateFromCircDepth() {
+    const C = parseFloat(circ_val.value);
+    const D = parseFloat(depth_val.value);
+    const b = D / 2;
+    
+    // Численный поиск a
+    let a = C / (Math.PI * 2); // начальное приближение
+    
+    for (let iter = 0; iter < 20; iter++) {
+        const p = getSuperellipsePerimeter(a, b, n);
+        const dp = (p - C) / a * 0.1;
+        a -= dp;
+        if (Math.abs(p - C) < 0.1) break;
+    }
+    
+    width_val.value = (a * 2).toFixed(1);
+    width.value = width_val.value;
+}
+
+function updateFromWidthDepth() {
+    const W = parseFloat(width_val.value);
+    const D = parseFloat(depth_val.value);
+    const a = W / 2;
+    const b = D / 2;
+    
+    // ✅ Правильная формула суперэллипса
+    const C = getSuperellipsePerimeter(a, b, n);
+    circ_val.value = C.toFixed(1);
+    circ.value = circ_val.value;
+}
+</script>
+
+<script>
+// -------------------------
+// Связка ползунков и числовых полей
+// -------------------------
+function bind(idRange, idNumber, callback) {
+    const r = document.getElementById(idRange);
+    const n = document.getElementById(idNumber);
+
+    r.addEventListener("input", () => {
+        n.value = r.value;
+        callback();
+    });
+
+    n.addEventListener("input", () => {
+        r.value = n.value;
+        callback();
+    });
+}
+
+// -------------------------
+// Привязка логики
+// -------------------------
+bind("circ", "circ_val", () => {
+    // если меняем обхват — пересчитываем глубину
+    updateFromCircWidth();
+});
+
+bind("width", "width_val", () => {
+    // если меняем ширину — пересчитываем глубину
+    updateFromCircWidth();
+});
+
+bind("depth", "depth_val", () => {
+    // если меняем глубину — пересчитываем ширину
+    updateFromCircDepth();
+});
+
+
+const cfn = document.getElementById("coefN");
+
+cfn.addEventListener("input", ()=>{
+    n = parseFloat(cfn.value);
+    updateFromCircWidth();
+})
+
+// Начальный пересчёт
+updateFromCircWidth();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+[v-cloak] { display: none !important; }
+:root { --c-male: #3b82f6; --c-female: #ec4899; --c-own: #e11d2e; }
+.app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+.app-head  { flex: 0 0 auto; }
+.app-main  { flex: 1 1 auto; min-height: 0; }
+/* ≥ lg: левая панель на всю высоту экрана, у каждой половины свой скролл */
+@media (min-width: 992px) {
+  .app-shell { height: 100vh; }
+  .app-main  { display: flex; }
+  .side  { flex: 0 0 50%; max-width: 50%; overflow-y: auto; border-right: 1px solid var(--bs-border-color); }
+  .board { flex: 1 1 50%; min-width: 0; overflow-y: auto; }
+}
+@media (max-width: 991.98px) {
+  .side { max-height: 75vh; overflow-y: auto; border-bottom: 1px solid var(--bs-border-color); }
+}
+.cat-head { cursor: pointer; user-select: none; }
+.cat-head:hover, .field-row:hover, .ms-item:hover { background: var(--bs-tertiary-bg); }
+.axis-btn { width: 2rem; padding: .1rem 0; font-weight: 600; flex: 0 0 auto; }
+.field-name-en { font-size: .72rem; }
+.chart-box { position: relative; height: clamp(320px, 52vh, 620px); }
+.chart-hint { pointer-events: none; max-width: 22rem; }
+/* «значение по умолчанию» (среднее по фильтрам) — бледнее обычного placeholder */
+.field-row .form-control::placeholder { opacity: .38; }
+/* выпадающие списки: фиксированная ширина меню и фиксированные колонки */
+.ms-menu { width: min(36rem, calc(100% - 1rem)); }
+.ms-list { max-height: 280px; overflow-y: auto; scrollbar-gutter: stable; }
+.ms-row  { display: grid; align-items: center; column-gap: .5rem; padding: .2rem .25rem;
+           grid-template-columns: 1.25rem 3.6rem minmax(0, 1fr) 2.6rem 3.4rem; }   /* ☐ · код · должность · класс · чел. */
+.ms-row.no-cols { grid-template-columns: 1.25rem minmax(0, 1fr) 3.4rem; }          /* ☐ · название · чел. */
+.ms-item { cursor: pointer; border-radius: .25rem; font-size: .875rem; }
+.ms-head { position: sticky; top: 0; z-index: 1; background: var(--bs-body-bg);
+           border-bottom: 1px solid var(--bs-border-color); font-size: .75rem; color: var(--bs-secondary-color); }
+.ms-code { font-family: var(--bs-font-monospace); font-size: .8rem; white-space: nowrap; }
+.ms-cls  { text-align: center; }
+.ms-n    { text-align: right; color: var(--bs-secondary-color); }
+.ms-code, .ms-cls, .ms-n { font-variant-numeric: tabular-nums; }
+.dot { display: inline-block; width: .7rem; height: .7rem; border-radius: 50%; margin-right: .25rem; }
+.th-male   { color: var(--c-male); }
+.th-female { color: var(--c-female); }
+.th-own    { color: var(--c-own); }

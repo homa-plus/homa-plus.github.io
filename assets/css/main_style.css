@@ -1,0 +1,19 @@
+:root {
+	--bs-primary-rgb:   255, 109, 194;
+	--bs-secondary-rgb: #6C757D;
+	--bs-success-rgb:   #198754;
+	--bs-info-rgb:      #0DCAF0;
+	--bs-warning-rgb:   #FFC107;
+	--bs-danger-rgb:    #DC3545;
+	--bs-light-rgb:     #F8F9FA;
+	--bs-dark-rgb:      #212529;
+}
+body {
+    background-color: #f8f9fa;
+}
+.chart-container {
+    position: relative;
+    margin: auto;
+    height: 400px;
+    width: 100%;
+}
